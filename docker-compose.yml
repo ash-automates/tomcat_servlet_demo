@@ -13,6 +13,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     networks:
       - inventory_network
 
@@ -23,8 +24,15 @@ services:
       - "8080:8080"
     volumes:
       - ./webapps:/usr/local/tomcat/webapps
+      - ./src/main/resources/logging.properties:/usr/local/tomcat/conf/logging.properties
+      - ./logs:/usr/local/tomcat/logs
     environment:
-      - JAVA_OPTS=-Xmx512m
+      - JAVA_OPTS=-Xmx512m -Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     restart: always
     depends_on:
       - mysql

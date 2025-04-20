@@ -47,10 +47,11 @@ public class ItemsServlet extends HttpServlet {
                 }
             }
             request.setAttribute("items", items);
-            request.getRequestDispatcher("/items.jsp").forward(request, response);
+            request.getRequestDispatcher("/items/items.jsp").forward(request, response);
         } catch (SQLException e) {
-            request.setAttribute("error", "Database error occurred");
-            request.getRequestDispatcher("/items.jsp").forward(request, response);
+            e.printStackTrace();
+            request.setAttribute("error", "Database error occurred: " + e.getMessage());
+            request.getRequestDispatcher("/items/items.jsp").forward(request, response);
         }
     }
 
@@ -63,24 +64,34 @@ public class ItemsServlet extends HttpServlet {
             return;
         }
 
-        String description = request.getParameter("description");
-        double price = Double.parseDouble(request.getParameter("price"));
-        LocalDate expirationDate = LocalDate.parse(request.getParameter("expirationDate"));
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        try {
+            String description = request.getParameter("description");
+            double price = Double.parseDouble(request.getParameter("price"));
+            LocalDate expirationDate = LocalDate.parse(request.getParameter("expirationDate"));
+            int quantity = Integer.parseInt(request.getParameter("quantity"));
 
-        try (Connection conn = DatabaseUtil.getConnection()) {
-            String sql = "INSERT INTO items (description, price, expiration_date, quantity) VALUES (?, ?, ?, ?)";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, description);
-                stmt.setDouble(2, price);
-                stmt.setDate(3, java.sql.Date.valueOf(expirationDate));
-                stmt.setInt(4, quantity);
-                stmt.executeUpdate();
+            try (Connection conn = DatabaseUtil.getConnection()) {
+                String sql = "INSERT INTO items (description, price, expiration_date, quantity) VALUES (?, ?, ?, ?)";
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, description);
+                    stmt.setDouble(2, price);
+                    stmt.setDate(3, java.sql.Date.valueOf(expirationDate));
+                    stmt.setInt(4, quantity);
+                    stmt.executeUpdate();
+                }
+                response.sendRedirect("items");
             }
-            response.sendRedirect("items");
         } catch (SQLException e) {
-            request.setAttribute("error", "Failed to add item");
-            request.getRequestDispatcher("/items.jsp").forward(request, response);
+            e.printStackTrace();
+            request.setAttribute("error", "Database error: " + e.getMessage());
+            request.getRequestDispatcher("/items/new.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "Invalid number format: " + e.getMessage());
+            request.getRequestDispatcher("/items/new.jsp").forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "An error occurred: " + e.getMessage());
+            request.getRequestDispatcher("/items/new.jsp").forward(request, response);
         }
     }
 } 

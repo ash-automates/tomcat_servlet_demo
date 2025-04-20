@@ -1,4 +1,4 @@
-USE ${MYSQL_DATABASE};
+USE inventory_db;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -18,4 +18,9 @@ CREATE TABLE IF NOT EXISTS items (
 );
 
 -- Insert a default admin user (password: admin123)
-INSERT INTO users (username, password) VALUES ('admin', 'admin123'); 
+INSERT INTO users (username, password) VALUES ('admin', 'admin123');
+
+-- Show tables and their structure
+SHOW TABLES;
+DESCRIBE users;
+DESCRIBE items; 
