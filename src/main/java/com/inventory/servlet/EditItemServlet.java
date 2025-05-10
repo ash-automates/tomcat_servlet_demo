@@ -8,14 +8,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
 import com.inventory.model.Item;
-import com.inventory.util.DatabaseUtil;
+import com.inventory.dao.DAOFactory;
+import com.inventory.dao.ItemDAO;
 
 @WebServlet("/items/edit")
 public class EditItemServlet extends HttpServlet {
@@ -29,28 +27,18 @@ public class EditItemServlet extends HttpServlet {
         }
 
         int id = Integer.parseInt(request.getParameter("id"));
-        try (Connection conn = DatabaseUtil.getConnection()) {
-            String sql = "SELECT * FROM items WHERE id = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, id);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        Item item = new Item(
-                            rs.getInt("id"),
-                            rs.getString("description"),
-                            rs.getDouble("price"),
-                            rs.getDate("expiration_date").toLocalDate(),
-                            rs.getInt("quantity")
-                        );
-                        request.setAttribute("item", item);
-                        request.getRequestDispatcher("/items/edit.jsp").forward(request, response);
-                    } else {
-                        response.sendRedirect("../items");
-                    }
-                }
+        try {
+            ItemDAO itemDAO = DAOFactory.getItemDAO();
+            Item item = itemDAO.getItemById(id);
+            
+            if (item != null) {
+                request.setAttribute("item", item);
+                request.getRequestDispatcher("/items/edit.jsp").forward(request, response);
+            } else {
+                response.sendRedirect("../items");
             }
         } catch (SQLException e) {
-            request.setAttribute("error", "Database error occurred");
+            request.setAttribute("error", "Database error occurred: " + e.getMessage());
             request.getRequestDispatcher("/items/edit.jsp").forward(request, response);
         }
     }
@@ -69,20 +57,26 @@ public class EditItemServlet extends HttpServlet {
         double price = Double.parseDouble(request.getParameter("price"));
         LocalDate expirationDate = LocalDate.parse(request.getParameter("expirationDate"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
+        
+        Item item = new Item();
+        item.setId(id);
+        item.setDescription(description);
+        item.setPrice(price);
+        item.setExpirationDate(expirationDate);
+        item.setQuantity(quantity);
 
-        try (Connection conn = DatabaseUtil.getConnection()) {
-            String sql = "UPDATE items SET description = ?, price = ?, expiration_date = ?, quantity = ? WHERE id = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, description);
-                stmt.setDouble(2, price);
-                stmt.setDate(3, java.sql.Date.valueOf(expirationDate));
-                stmt.setInt(4, quantity);
-                stmt.setInt(5, id);
-                stmt.executeUpdate();
+        try {
+            ItemDAO itemDAO = DAOFactory.getItemDAO();
+            boolean updated = itemDAO.updateItem(item);
+            
+            if (updated) {
+                response.sendRedirect("../items");
+            } else {
+                request.setAttribute("error", "Failed to update item - item not found");
+                request.getRequestDispatcher("/items/edit.jsp").forward(request, response);
             }
-            response.sendRedirect("../items");
         } catch (SQLException e) {
-            request.setAttribute("error", "Failed to update item");
+            request.setAttribute("error", "Failed to update item: " + e.getMessage());
             request.getRequestDispatcher("/items/edit.jsp").forward(request, response);
         }
     }

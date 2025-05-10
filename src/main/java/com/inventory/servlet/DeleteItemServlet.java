@@ -8,11 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import com.inventory.util.DatabaseUtil;
+import com.inventory.dao.DAOFactory;
+import com.inventory.dao.ItemDAO;
 
 @WebServlet("/items/delete")
 public class DeleteItemServlet extends HttpServlet {
@@ -26,14 +25,15 @@ public class DeleteItemServlet extends HttpServlet {
         }
 
         int id = Integer.parseInt(request.getParameter("id"));
-        try (Connection conn = DatabaseUtil.getConnection()) {
-            String sql = "DELETE FROM items WHERE id = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, id);
-                stmt.executeUpdate();
+        try {
+            ItemDAO itemDAO = DAOFactory.getItemDAO();
+            boolean deleted = itemDAO.deleteItem(id);
+            
+            if (!deleted) {
+                request.setAttribute("error", "Failed to delete item - item not found");
             }
         } catch (SQLException e) {
-            request.setAttribute("error", "Failed to delete item");
+            request.setAttribute("error", "Failed to delete item: " + e.getMessage());
         }
         response.sendRedirect("../items");
     }

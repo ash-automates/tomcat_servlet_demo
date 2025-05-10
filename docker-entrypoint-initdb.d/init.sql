@@ -1,3 +1,9 @@
+
+-- Create and grant privileges to the inventory_user
+CREATE USER IF NOT EXISTS 'inventory_user'@'%' IDENTIFIED BY 'inventory_pass';
+GRANT ALL PRIVILEGES ON inventory_db.* TO 'inventory_user'@'%';
+FLUSH PRIVILEGES;
+
 USE inventory_db;
 
 CREATE TABLE IF NOT EXISTS users (
