@@ -26,7 +26,7 @@ public class EditItemServlet extends HttpServlet {
             return;
         }
 
-        int id = Integer.parseInt(request.getParameter("id"));
+        Long id = Long.parseLong(request.getParameter("id"));
         try {
             ItemDAO itemDAO = DAOFactory.getItemDAO();
             Item item = itemDAO.getItemById(id);
@@ -52,7 +52,7 @@ public class EditItemServlet extends HttpServlet {
             return;
         }
 
-        int id = Integer.parseInt(request.getParameter("id"));
+        Long id = Long.parseLong(request.getParameter("id"));
         String description = request.getParameter("description");
         double price = Double.parseDouble(request.getParameter("price"));
         LocalDate expirationDate = LocalDate.parse(request.getParameter("expirationDate"));
@@ -80,4 +80,4 @@ public class EditItemServlet extends HttpServlet {
             request.getRequestDispatcher("/items/edit.jsp").forward(request, response);
         }
     }
-} 
+}

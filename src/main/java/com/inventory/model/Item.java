@@ -2,16 +2,30 @@ package com.inventory.model;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "items")
 public class Item {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
     private String description;
+
+    @Column(nullable = false)
     private double price;
+
+    @Column(nullable = false)
     private LocalDate expirationDate;
+
+    @Column(nullable = false)
     private int quantity;
 
     public Item() {}
 
-    public Item(int id, String description, double price, LocalDate expirationDate, int quantity) {
+    public Item(Long id, String description, double price, LocalDate expirationDate, int quantity) {
         this.id = id;
         this.description = description;
         this.price = price;
@@ -20,11 +34,11 @@ public class Item {
     }
 
     // Getters and Setters
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -59,4 +73,4 @@ public class Item {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-} 
+}

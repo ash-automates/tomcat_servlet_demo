@@ -1,81 +1,86 @@
 package com.inventory.dao;
 
 import com.inventory.model.User;
-import com.inventory.util.DatabaseUtil;
+import jakarta.persistence.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * JDBC implementation of the UserDAO interface
+ * JPA implementation of the UserDAO interface
  */
 public class UserDAOImpl implements UserDAO {
-    
+
     private static final Logger logger = Logger.getLogger(UserDAOImpl.class.getName());
-    
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("inventoryPU");
+
     @Override
-    public User findByUsernameAndPassword(String username, String password) throws SQLException {
+    public User findByUsernameAndPassword(String username, String password) {
         User user = null;
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        EntityManager em = emf.createEntityManager();
         
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    user = mapResultSetToUser(rs);
-                }
-            }
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error authenticating user: " + username, e);
-            throw e;
+        try {
+            logger.log(Level.INFO, "Executing query with username: " + username.trim() + " and password: " + password.trim());
+
+            // Update logic to validate both username and password
+            user = em.createQuery("SELECT u FROM User u WHERE u.username = :username AND u.password = :password", User.class)
+                     .setParameter("username", username.trim())
+                     .setParameter("password", password.trim())
+                     .getSingleResult();
+
+            logger.log(Level.INFO, "Query executed successfully. User found: " + user);
+        } catch (NoResultException e) {
+            logger.log(Level.WARNING, "No user found with the given username and password. Username: " + username.trim());
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error authenticating user: " + username.trim(), e);
+        } finally {
+            em.close();
         }
         
         return user;
     }
     
     @Override
-    public User findByUsername(String username) throws SQLException {
+    public User findByUsername(String username) {
         User user = null;
-        String sql = "SELECT * FROM users WHERE username = ?";
+        EntityManager em = emf.createEntityManager();
         
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, username);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    user = mapResultSetToUser(rs);
-                }
-            }
-        } catch (SQLException e) {
+        try {
+            user = em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+                     .setParameter("username", username)
+                     .getSingleResult();
+        } catch (NoResultException e) {
+            logger.log(Level.WARNING, "No user found with the given username.");
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Error finding user by username: " + username, e);
-            throw e;
+        } finally {
+            em.close();
         }
         
         return user;
     }
     
     /**
-     * Helper method to map a ResultSet row to a User object
+     * Method to add a new user to the database
      * 
-     * @param rs the ResultSet to map
-     * @return the mapped User object
-     * @throws SQLException if a database access error occurs
+     * @param user the User object to persist
      */
-    private User mapResultSetToUser(ResultSet rs) throws SQLException {
-        return new User(
-            rs.getInt("id"),
-            rs.getString("username"),
-            rs.getString("password")
-        );
+    public void addUser(User user) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        
+        try {
+            transaction.begin();
+            em.persist(user);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            logger.log(Level.SEVERE, "Error adding user: " + user.getUsername(), e);
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 }

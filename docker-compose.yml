@@ -3,45 +3,30 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0
-    container_name: inventory_mysql
+    container_name: mysql_container
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: inventory_db
+      MYSQL_USER: inventory_user
+      MYSQL_PASSWORD: inventory_password
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    networks:
-      - inventory_network
 
   tomcat:
-    image: tomcat:10.1-jdk17
-    container_name: tomcat_demo
+    image: tomcat:10.1
+    container_name: tomcat_container
     ports:
       - "8080:8080"
-    volumes:
-      - ./webapps:/usr/local/tomcat/webapps
-      - ./src/main/resources/logging.properties:/usr/local/tomcat/conf/logging.properties
-      - ./logs:/usr/local/tomcat/logs
-    environment:
-      - JAVA_OPTS=-Xmx512m -Djava.util.logging.config.file=/usr/local/tomcat/conf/logging.properties
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_PORT=${MYSQL_PORT}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    restart: always
     depends_on:
       - mysql
-    networks:
-      - inventory_network
+    volumes:
+      - ./target/inventory-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/ROOT.war
 
 volumes:
   mysql_data:
 
 networks:
   inventory_network:
-    driver: bridge 
+    driver: bridge

@@ -21,7 +21,58 @@
             <h2>Items</h2>
             <a href="items/new" class="btn btn-primary">Add New Item</a>
         </div>
-
+        
+        <!-- Search Form -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Search Items</h5>
+            </div>
+            <div class="card-body">
+                <form action="items" method="get" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description" name="description" value="${searchDescription}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="minPrice" class="form-label">Min Price</label>
+                        <input type="number" step="0.01" class="form-control" id="minPrice" name="minPrice" value="${searchMinPrice}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="maxPrice" class="form-label">Max Price</label>
+                        <input type="number" step="0.01" class="form-control" id="maxPrice" name="maxPrice" value="${searchMaxPrice}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="fromDate" class="form-label">From Date</label>
+                        <input type="date" class="form-control" id="fromDate" name="fromDate" value="${searchFromDate}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="toDate" class="form-label">To Date</label>
+                        <input type="date" class="form-control" id="toDate" name="toDate" value="${searchToDate}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="minQuantity" class="form-label">Min Quantity</label>
+                        <input type="number" class="form-control" id="minQuantity" name="minQuantity" value="${searchMinQuantity}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="maxQuantity" class="form-label">Max Quantity</label>
+                        <input type="number" class="form-control" id="maxQuantity" name="maxQuantity" value="${searchMaxQuantity}">
+                    </div>
+                    
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <a href="items" class="btn btn-secondary">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Results Table -->
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -49,6 +100,11 @@
                             </td>
                         </tr>
                     </c:forEach>
+                    <c:if test="${empty items}">
+                        <tr>
+                            <td colspan="6" class="text-center">No items found</td>
+                        </tr>
+                    </c:if>
                 </tbody>
             </table>
         </div>
@@ -56,4 +112,4 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>
