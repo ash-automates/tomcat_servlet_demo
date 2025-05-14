@@ -10,10 +10,10 @@ ALTER TABLE items AUTO_INCREMENT = 1;
 -- Make sure columns match JPA entity types
 ALTER TABLE items MODIFY id BIGINT AUTO_INCREMENT;
 ALTER TABLE items MODIFY price DOUBLE NOT NULL;
-ALTER TABLE items MODIFY expiration_date DATE NOT NULL;
+ALTER TABLE items MODIFY expirationDate DATE NOT NULL;
 
 -- Insert sample items with various descriptions, prices, expiration dates, and quantities
-INSERT INTO items (description, price, expiration_date, quantity) VALUES 
+INSERT INTO items (description, price, expirationDate, quantity) VALUES 
 ('Organic Apples - Red Delicious', 3.99, '2025-06-15', 150),
 ('Premium Orange Juice 1L', 5.49, '2025-07-20', 75),
 ('Whole Wheat Bread', 2.99, '2025-05-30', 45),
