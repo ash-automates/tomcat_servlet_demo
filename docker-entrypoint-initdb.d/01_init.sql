@@ -1,6 +1,5 @@
-
 -- Create and grant privileges to the inventory_user
-CREATE USER IF NOT EXISTS 'inventory_user'@'%' IDENTIFIED BY 'inventory_pass';
+CREATE USER IF NOT EXISTS 'inventory_user'@'%' IDENTIFIED BY 'inventory_password';
 GRANT ALL PRIVILEGES ON inventory_db.* TO 'inventory_user'@'%';
 FLUSH PRIVILEGES;
 
@@ -29,4 +28,4 @@ INSERT INTO users (username, password) VALUES ('admin', 'admin123');
 -- Show tables and their structure
 SHOW TABLES;
 DESCRIBE users;
-DESCRIBE items; 
+DESCRIBE items;

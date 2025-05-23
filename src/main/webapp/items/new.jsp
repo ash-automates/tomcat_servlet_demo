@@ -24,7 +24,7 @@
             <div class="alert alert-danger">${error}</div>
         </c:if>
 
-        <form action="../items" method="post" class="mt-4">
+        <form action="new" method="post" class="mt-4">
             <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
                 <input type="text" class="form-control" id="description" name="description" required>

@@ -68,7 +68,43 @@ public class ItemsServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        // Handle POST requests (form submissions) the same as GET
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("username") == null) {
+            response.sendRedirect("login");
+            return;
+        }
+        
+        // Check if this is a new item submission from the new.jsp form
+        if (request.getParameter("description") != null && 
+            request.getParameter("price") != null && 
+            request.getParameter("expirationDate") != null && 
+            request.getParameter("quantity") != null) {
+            
+            try {
+                String description = request.getParameter("description");
+                double price = Double.parseDouble(request.getParameter("price"));
+                LocalDate expirationDate = LocalDate.parse(request.getParameter("expirationDate"), DATE_FORMATTER);
+                int quantity = Integer.parseInt(request.getParameter("quantity"));
+                
+                Item item = new Item();
+                item.setDescription(description);
+                item.setPrice(price);
+                item.setExpirationDate(expirationDate);
+                item.setQuantity(quantity);
+                
+                ItemDAO itemDAO = DAOFactory.getItemDAO();
+                itemDAO.insertItem(item);
+                
+                // Redirect to GET request to show all items
+                response.sendRedirect("items");
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+                request.setAttribute("error", "Error adding item: " + e.getMessage());
+            }
+        }
+        
+        // If not a new item submission or if an error occurred, handle as GET
         doGet(request, response);
     }
     
